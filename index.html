@@ -3,43 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phone Sensors</title>
+    <title>Phone Sensor Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        p {
+            font-size: 18px;
+        }
+        .sensor {
+            margin: 20px 0;
+        }
+        .error {
+            color: red;
+        }
+    </style>
 </head>
 <body>
     <h1>Phone Sensor Data</h1>
-    <div>
-        <h2>Accelerometer (DeviceMotion):</h2>
+
+    <div class="sensor">
+        <h2>Accelerometer Data:</h2>
         <p>X: <span id="accX">0</span></p>
         <p>Y: <span id="accY">0</span></p>
         <p>Z: <span id="accZ">0</span></p>
+        <p class="error" id="accError"></p>
     </div>
-    <div>
-        <h2>Gyroscope (DeviceOrientation):</h2>
-        <p>Alpha: <span id="alpha">0</span></p>
-        <p>Beta: <span id="beta">0</span></p>
-        <p>Gamma: <span id="gamma">0</span></p>
+
+    <div class="sensor">
+        <h2>Gyroscope Data:</h2>
+        <p>Alpha: <span id="gyroX">0</span></p>
+        <p>Beta: <span id="gyroY">0</span></p>
+        <p>Gamma: <span id="gyroZ">0</span></p>
+        <p class="error" id="gyroError"></p>
     </div>
 
     <script>
-        if (window.DeviceMotionEvent) {
-            window.addEventListener('devicemotion', function(event) {
-            document.getElementById('accX').textContent = event.acceleration.x.toFixed(2);
-            document.getElementById('accY').textContent = event.acceleration.y.toFixed(2);
-            document.getElementById('accZ').textContent = event.acceleration.z.toFixed(2);
-            });
-        } else {
-            alert("DeviceMotion is not supported on this device/browser.");
-            }
+        // Function to check permission for the sensor if needed
+        async function checkSensorPermissions() {
+            if ('permissions' in navigator) {
+                try {
+                    const accelerometerPermission = await navigator.permissions.query({ name: 'accelerometer' });
+                    const gyroscopePermission = await navigator.permissions.query({ name: 'gyroscope' });
 
-        if (window.DeviceOrientationEvent) {
-            window.addEventListener('deviceorientation', function(event) {
-                document.getElementById('alpha').textContent = event.alpha.toFixed(2);
-                document.getElementById('beta').textContent = event.beta.toFixed(2);
-                document.getElementById('gamma').textContent = event.gamma.toFixed(2);
-            });
-        } else {
-            alert("DeviceOrientation is not supported on this device/browser.");
+                    console.log('Accelerometer permission state:', accelerometerPermission.state);
+                    console.log('Gyroscope permission state:', gyroscopePermission.state);
+
+                    accelerometerPermission.onchange = () => {
+                        console.log('Accelerometer permission changed to:', accelerometerPermission.state);
+                    };
+                    gyroscopePermission.onchange = () => {
+                        console.log('Gyroscope permission changed to:', gyroscopePermission.state);
+                    };
+                } catch (error) {
+                    console.error('Permission error:', error);
+                }
+            }
         }
+
+        // Check permissions
+        checkSensorPermissions();
+
+        // Function to start the Accelerometer
+        function startAccelerometer() {
+            if ('Accelerometer' in window) {
+                try {
+                    const accelerometer = new Accelerometer({ frequency: 60 });
+                    accelerometer.addEventListener('reading', () => {
+                        document.getElementById('accX').textContent = accelerometer.x.toFixed(2);
+                        document.getElementById('accY').textContent = accelerometer.y.toFixed(2);
+                        document.getElementById('accZ').textContent = accelerometer.z.toFixed(2);
+                    });
+                    accelerometer.addEventListener('error', event => {
+                        if (event.error.name === 'NotAllowedError') {
+                            document.getElementById('accError').textContent = 'Permission to access accelerometer was denied.';
+                        } else if (event.error.name === 'NotReadableError') {
+                            document.getElementById('accError').textContent = 'Cannot read accelerometer data.';
+                        }
+                    });
+                    accelerometer.start();
+                } catch (error) {
+                    document.getElementById('accError').textContent = 'Accelerometer not supported.';
+                    console.error('Accelerometer error:', error);
+                }
+            } else {
+                document.getElementById('accError').textContent = 'Accelerometer not supported on this device.';
+            }
+        }
+
+        // Function to start the Gyroscope
+        function startGyroscope() {
+            if ('Gyroscope' in window) {
+                try {
+                    const gyroscope = new Gyroscope({ frequency: 60 });
+                    gyroscope.addEventListener('reading', () => {
+                        document.getElementById('gyroX').textContent = gyroscope.x.toFixed(2);
+                        document.getElementById('gyroY').textContent = gyroscope.y.toFixed(2);
+                        document.getElementById('gyroZ').textContent = gyroscope.z.toFixed(2);
+                    });
+                    gyroscope.addEventListener('error', event => {
+                        if (event.error.name === 'NotAllowedError') {
+                            document.getElementById('gyroError').textContent = 'Permission to access gyroscope was denied.';
+                        } else if (event.error.name === 'NotReadableError') {
+                            document.getElementById('gyroError').textContent = 'Cannot read gyroscope data.';
+                        }
+                    });
+                    gyroscope.start();
+                } catch (error) {
+                    document.getElementById('gyroError').textContent = 'Gyroscope not supported.';
+                    console.error('Gyroscope error:', error);
+                }
+            } else {
+                document.getElementById('gyroError').textContent = 'Gyroscope not supported on this device.';
+            }
+        }
+
+        // Start sensors
+        startAccelerometer();
+        startGyroscope();
     </script>
 </body>
 </html>
