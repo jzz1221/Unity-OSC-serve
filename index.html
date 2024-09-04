@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phone Sensors to OSC</title>
+</head>
+<body>
+    <h1>Sending Sensor Data</h1>
+    <p id="status">Waiting for sensor data...</p>
+
+    <script>
+        // 创建WebSocket连接
+        const socket = new WebSocket('ws://YOUR_COMPUTER_IP:8080');
+
+        // 打开连接时的回调
+        socket.onopen = function(event) {
+            console.log("WebSocket is open now.");
+            document.getElementById('status').innerText = "Connected to WebSocket!";
+        };
+
+        // 当设备移动时，捕获加速度计数据
+        window.addEventListener('devicemotion', function(event) {
+            const acc = event.acceleration;
+            const accData = {
+                x: acc.x,
+                y: acc.y,
+                z: acc.z
+            };
+
+            // 将加速度计数据发送到WebSocket服务器
+            socket.send(JSON.stringify({
+                type: 'accelerometer',
+                data: accData
+            }));
+        });
+
+        // 捕获陀螺仪数据
+        window.addEventListener('deviceorientation', function(event) {
+            const gyroData = {
+                alpha: event.alpha,
+                beta: event.beta,
+                gamma: event.gamma
+            };
+
+            // 将陀螺仪数据发送到WebSocket服务器
+            socket.send(JSON.stringify({
+                type: 'gyroscope',
+                data: gyroData
+            }));
+        });
+    </script>
+</body>
+</html>
+</title>
+</head>
+<body>
+
+</body>
+</html>
