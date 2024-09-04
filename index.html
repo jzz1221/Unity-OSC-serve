@@ -21,19 +21,25 @@
     </div>
 
     <script>
-        // 获取加速度计数据（DeviceMotion API）
-        window.addEventListener('devicemotion', function(event) {
+        if (window.DeviceMotionEvent) {
+            window.addEventListener('devicemotion', function(event) {
             document.getElementById('accX').textContent = event.acceleration.x.toFixed(2);
             document.getElementById('accY').textContent = event.acceleration.y.toFixed(2);
             document.getElementById('accZ').textContent = event.acceleration.z.toFixed(2);
-        });
+            });
+        } else {
+            alert("DeviceMotion is not supported on this device/browser.");
+            }
 
-        // 获取陀螺仪数据（DeviceOrientation API）
-        window.addEventListener('deviceorientation', function(event) {
-            document.getElementById('alpha').textContent = event.alpha.toFixed(2);
-            document.getElementById('beta').textContent = event.beta.toFixed(2);
-            document.getElementById('gamma').textContent = event.gamma.toFixed(2);
-        });
+        if (window.DeviceOrientationEvent) {
+            window.addEventListener('deviceorientation', function(event) {
+                document.getElementById('alpha').textContent = event.alpha.toFixed(2);
+                document.getElementById('beta').textContent = event.beta.toFixed(2);
+                document.getElementById('gamma').textContent = event.gamma.toFixed(2);
+            });
+        } else {
+            alert("DeviceOrientation is not supported on this device/browser.");
+        }
     </script>
 </body>
 </html>
